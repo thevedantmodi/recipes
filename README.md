@@ -6,7 +6,7 @@ to remember the recipes themself.
 
 # Sharing
 
-I also encourage pull requests to this repository, to maintain a **free and open source** recipe book!
+I also encourage to fork and pull request this repository, to maintain a **free and open source** recipe book!
 
 
 

@@ -8,6 +8,7 @@ to remember the recipes themself.
 
 I also encourage to fork and pull request this repository, to maintain a **free and open source** recipe book!
 
+Please find empty directories/recipes for recipes that need to be added still!
 
 
 Contact me for any inquiries you have.

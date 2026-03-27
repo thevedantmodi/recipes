@@ -30,15 +30,12 @@ jobs:
       - name: Validate all .cook files
         run: |
           failed=0
-          for recipe in *.cook; do
-            echo "Validating $recipe..."
-            if ! cook doctor validate --strict "$recipe"; then
-              echo "❌ $recipe failed validation"
-              failed=1
-            else
-              echo "✅ $recipe passed"
-            fi
-          done
+          if ! cook doctor validate --strict ; then
+            echo "❌ $recipe failed validation"
+            failed=1
+          else
+            echo "✅ $recipe passed"
+          fi
           exit $failed
 
   build:

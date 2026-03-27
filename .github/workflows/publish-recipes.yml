@@ -1,0 +1,92 @@
+# .github/workflows/publish-recipes.yml
+name: Publish Recipes
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '**.cook'
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install CookCLI
+        run: |
+          curl -L https://github.com/cooklang/cookcli/releases/latest/download/cook-linux-amd64 -o cook
+          chmod +x cook
+          sudo mv cook /usr/local/bin/
+
+      - name: Validate all .cook files
+        run: |
+          failed=0
+          for recipe in *.cook; do
+            echo "Validating $recipe..."
+            if ! cook doctor validate --strict "$recipe"; then
+              echo "❌ $recipe failed validation"
+              failed=1
+            else
+              echo "✅ $recipe passed"
+            fi
+          done
+          exit $failed
+
+  build:
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install CookCLI
+        run: |
+          curl -L https://github.com/cooklang/cookcli/releases/latest/download/cook-linux-amd64 -o cook
+          chmod +x cook
+          sudo mv cook /usr/local/bin/
+
+      - name: Install Hugo
+        uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: latest
+          extended: true
+
+      - name: Convert .cook files to Markdown for Hugo
+        run: |
+          mkdir -p content/recipes
+          for recipe in *.cook; do
+            basename=$(basename "$recipe" .cook)
+            cook recipe -f markdown "$recipe" > "content/recipes/${basename}.md"
+          done
+
+      - name: Copy raw .cook files for federation access
+        run: |
+          mkdir -p static/recipes
+          cp *.cook static/recipes/
+
+      - name: Build Hugo site
+        run: hugo --minify
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public/
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: https://recipes.vedantmodi.com
+    steps:
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4

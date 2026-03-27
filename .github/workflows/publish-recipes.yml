@@ -24,8 +24,7 @@ jobs:
 
       - name: Install CookCLI
         run: |
-          curl -L https://github.com/cooklang/cookcli/releases/latest/download/cook-linux-amd64 -o cook
-          chmod +x cook
+          curl -L https://github.com/cooklang/CookCLI/releases/latest/download/cook-linux-amd64.tar.gz | tar xz
           sudo mv cook /usr/local/bin/
 
       - name: Validate all .cook files
